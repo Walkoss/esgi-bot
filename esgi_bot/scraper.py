@@ -1,4 +1,5 @@
 import requests
+from esgi_bot.errors import AuthError, ValueNotFound
 from esgi_bot.subject import Subject
 from bs4 import BeautifulSoup
 
@@ -10,9 +11,9 @@ class Scraper(object):
     def __init__(self, login, password):
         self.session = self._new_session(login, password)
 
-    def get_marks(self, subject_name=""):
+    def get_marks(self, subject_name="ALL"):
         soup = BeautifulSoup(self.session.get(BASE_URL + "marks").text, "html.parser")
-        subject_array = []
+        marks_array = []
         for line in soup.find(id="marksWidget").find_all('tr'):
             name = teacher = ""
             coeff = ects = 0
@@ -32,14 +33,14 @@ class Scraper(object):
                         marks.append(data.contents[0])
             if name or teacher:
                 subject = Subject(name, teacher, coeff, ects, marks)
-                if subject_name and subject_name == subject.name:
+                if subject_name == subject.name:
                     return subject
-                elif not subject_name:
-                    subject_array.append(subject)
-        if not subject_name:
-            return subject_array
+                elif subject_name == "ALL":
+                    marks_array.append(subject)
+        if subject_name == "ALL":
+            return marks_array
         else:
-            raise RuntimeError('Subject not found !')
+            raise ValueNotFound()
 
     # TODO IDs could not be statics so take care ;)
     def get_last_annual_documents(self):
@@ -72,7 +73,12 @@ class Scraper(object):
             js = row.find("a").get('onclick')
             href = js[js.find("('") + 2:js.find("')")]
             links[name] = href
-        return links if not _name else links[_name]
+        if _name and _name in links:
+            return links[_name]
+        elif not _name:
+            return links
+        else:
+            raise ValueNotFound()
 
     def _new_session(self, login, password):
         s = requests.session()
@@ -88,8 +94,8 @@ class Scraper(object):
         }
 
         # authentication
-        result = s.post(LOGIN_URL, data=login_data)
-        if result.status_code == 200:
+        s.post(LOGIN_URL, data=login_data)
+        if not BeautifulSoup(s.get(BASE_URL).text, "html.parser").find("input", {"class": "input_submit"}):
             return s
         else:
-            raise RuntimeError('Authentication failed !')
+            raise AuthError()
