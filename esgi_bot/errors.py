@@ -1,6 +1,6 @@
-class AuthError(RuntimeError):
+class AuthError(Exception):
     pass
 
 
-class ValueNotFoundError(RuntimeError):
+class ValueNotFoundError(Exception):
     pass
