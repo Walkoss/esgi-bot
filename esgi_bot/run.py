@@ -1,5 +1,4 @@
 from esgi_bot import logger
-from esgi_bot.scrap import *
 from esgi_bot.conf import DISCORD_TOKEN
 from discord.ext import commands
 

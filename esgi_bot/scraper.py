@@ -8,7 +8,7 @@ BASE_URL = "https://www.myges.fr/student/"
 
 class Scraper(object):
     def __init__(self, login, password):
-        self.session = new_session(login, password)
+        self.session = self._new_session(login, password)
 
     def get_marks(self, subject_name=""):
         soup = BeautifulSoup(self.session.get(BASE_URL + "marks").text, "html.parser")
@@ -74,23 +74,22 @@ class Scraper(object):
             links[name] = href
         return links if not _name else links[_name]
 
+    def _new_session(self, login, password):
+        s = requests.session()
+        t = s.get(LOGIN_URL).text
+        soup = BeautifulSoup(t, "html.parser")
 
-def new_session(login, password):
-    s = requests.session()
-    t = s.get(LOGIN_URL).text
-    soup = BeautifulSoup(t, "html.parser")
+        login_data = {
+            "username": login,
+            "password": password,
+            "lt": soup.find(attrs={"name": "lt"})['value'],
+            "execution": soup.find(attrs={"name": "execution"})['value'],
+            "_eventId": soup.find(attrs={"name": "_eventId"})['value']
+        }
 
-    login_data = {
-        "username": login,
-        "password": password,
-        "lt": soup.find(attrs={"name": "lt"})['value'],
-        "execution": soup.find(attrs={"name": "execution"})['value'],
-        "_eventId": soup.find(attrs={"name": "_eventId"})['value']
-    }
-
-    # authentication
-    result = s.post(LOGIN_URL, data=login_data)
-    if result.status_code == 200:
-        return s
-    else:
-        raise RuntimeError('Authentication failed !')
+        # authentication
+        result = s.post(LOGIN_URL, data=login_data)
+        if result.status_code == 200:
+            return s
+        else:
+            raise RuntimeError('Authentication failed !')
