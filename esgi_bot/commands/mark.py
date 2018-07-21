@@ -1,12 +1,14 @@
 from discord.ext import commands
+from esgi_bot.users import is_authenticated
 
 
-class Notes:
+class Mark:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
-    async def marks(self, subject='ALL'):
+    @commands.command(pass_context=True)
+    @is_authenticated()
+    async def marks(self, ctx, subject='ALL'):
         if subject == 'ALL':
             await self.bot.say('Getting all marks')
         else:
@@ -14,4 +16,4 @@ class Notes:
 
 
 def setup(bot):
-    bot.add_cog(Notes(bot))
+    bot.add_cog(Mark(bot))
