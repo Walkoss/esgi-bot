@@ -1,65 +1,9 @@
 import requests
+from esgi_bot.subject import Subject
 from bs4 import BeautifulSoup
 
 LOGIN_URL = "https://cas-sso.reseau-ges.fr/login"
 BASE_URL = "https://www.myges.fr/student/"
-
-
-class Subject(object):
-    name = teacher = ""
-    coeff = ects = 0
-    marks = []
-
-    def __init__(self, name, teacher, coeff, ects, marks):
-        self.name = name
-        self.teacher = teacher
-        self.coeff = coeff
-        self.ects = ects
-        self.marks = marks
-
-    def __str__(self):
-        return "name: {}\n" \
-               "teacher: {}\n" \
-               "coeff: {}\n" \
-               "ects: {}\n" \
-               "marks: {}".format(self.name, self.teacher, self.coeff, self.ects, self.marks)
-
-
-def new_subject(name, teacher, coeff, ects, marks):
-    subject = Subject(name, teacher, coeff, ects, marks)
-    return subject
-
-
-def new_session(login, password):
-    s = requests.session()
-    t = s.get(LOGIN_URL).text
-    soup = BeautifulSoup(t, "html.parser")
-
-    login_data = {
-        "username": login,
-        "password": password,
-        "lt": soup.find(attrs={"name": "lt"})['value'],
-        "execution": soup.find(attrs={"name": "execution"})['value'],
-        "_eventId": soup.find(attrs={"name": "_eventId"})['value']
-    }
-
-    # authentication
-    result = s.post(LOGIN_URL, data=login_data)
-    if result.status_code == 200:
-        return s
-    else:
-        raise RuntimeError('Authentication failed !')
-
-
-def get_array_links(page, _id, _name=""):
-    links = dict()
-    table = page.find("div", {"id": _id})
-    for row in table.find("tbody").find_all('tr'):
-        name = row.find("a").contents[0].replace("\n", "").strip()
-        js = row.find("a").get('onclick')
-        href = js[js.find("('") + 2:js.find("')")]
-        links[name] = href
-    return links if not _name else links[_name]
 
 
 class Scraper(object):
@@ -87,7 +31,7 @@ class Scraper(object):
                     elif data.contents:
                         marks.append(data.contents[0])
             if name or teacher:
-                subject = new_subject(name, teacher, coeff, ects, marks)
+                subject = Subject(name, teacher, coeff, ects, marks)
                 if subject_name and subject_name == subject.name:
                     return subject
                 elif not subject_name:
@@ -100,15 +44,15 @@ class Scraper(object):
     # TODO IDs could not be statics so take care ;)
     def get_last_annual_documents(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "home").text, "html.parser")
-        return get_array_links(soup, "j_idt211:j_idt212")
+        return self._get_array_links(soup, "j_idt211:j_idt212")
 
     def get_last_planning(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "home").text, "html.parser")
-        return get_array_links(soup, "j_idt211:j_idt212", "Planning Annuel : 3 ESGI - IBD")
+        return self._get_array_links(soup, "j_idt211:j_idt212", "Planning Annuel : 3 ESGI - IBD")
 
     def get_last_course_supports(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "home").text, "html.parser")
-        return get_array_links(soup, "j_idt243:j_idt244")
+        return self._get_array_links(soup, "j_idt243:j_idt244")
 
     def get_next_projects_step(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "home").text, "html.parser")
@@ -119,3 +63,34 @@ class Scraper(object):
             date = row.find("span", {"style": "font-size:11px;font-weight: bold;color: #000000"}).contents[0]
             steps[i] = [name, date]
         return steps
+
+    def _get_array_links(self, page, _id, _name=""):
+        links = dict()
+        table = page.find("div", {"id": _id})
+        for row in table.find("tbody").find_all('tr'):
+            name = row.find("a").contents[0].replace("\n", "").strip()
+            js = row.find("a").get('onclick')
+            href = js[js.find("('") + 2:js.find("')")]
+            links[name] = href
+        return links if not _name else links[_name]
+
+
+def new_session(login, password):
+    s = requests.session()
+    t = s.get(LOGIN_URL).text
+    soup = BeautifulSoup(t, "html.parser")
+
+    login_data = {
+        "username": login,
+        "password": password,
+        "lt": soup.find(attrs={"name": "lt"})['value'],
+        "execution": soup.find(attrs={"name": "execution"})['value'],
+        "_eventId": soup.find(attrs={"name": "_eventId"})['value']
+    }
+
+    # authentication
+    result = s.post(LOGIN_URL, data=login_data)
+    if result.status_code == 200:
+        return s
+    else:
+        raise RuntimeError('Authentication failed !')
