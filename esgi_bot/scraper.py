@@ -9,7 +9,24 @@ BASE_URL = "https://www.myges.fr/student/"
 
 class Scraper(object):
     def __init__(self, login, password):
-        self.session = self._new_session(login, password)
+        s = requests.session()
+        t = s.get(LOGIN_URL).text
+        soup = BeautifulSoup(t, "html.parser")
+
+        login_data = {
+            "username": login,
+            "password": password,
+            "lt": soup.find(attrs={"name": "lt"})['value'],
+            "execution": soup.find(attrs={"name": "execution"})['value'],
+            "_eventId": soup.find(attrs={"name": "_eventId"})['value']
+        }
+
+        # authentication
+        s.post(LOGIN_URL, data=login_data)
+        if not BeautifulSoup(s.get(BASE_URL).text, "html.parser").find("input", {"class": "input_submit"}):
+            self.session = s
+        else:
+            raise AuthError("Invalid username and/or password !")
 
     def get_marks(self, subject_name="ALL"):
         soup = BeautifulSoup(self.session.get(BASE_URL + "marks").text, "html.parser")
@@ -34,7 +51,7 @@ class Scraper(object):
             if name or teacher:
                 subject = Subject(name, teacher, coeff, ects, marks)
                 if subject_name == subject.name:
-                    return subject
+                    return [subject]
                 elif subject_name == "ALL":
                     marks_array.append(subject)
         if subject_name == "ALL":
@@ -79,23 +96,3 @@ class Scraper(object):
             return links
         else:
             raise ValueNotFoundError("Invalid entry or value not found !")
-
-    def _new_session(self, login, password):
-        s = requests.session()
-        t = s.get(LOGIN_URL).text
-        soup = BeautifulSoup(t, "html.parser")
-
-        login_data = {
-            "username": login,
-            "password": password,
-            "lt": soup.find(attrs={"name": "lt"})['value'],
-            "execution": soup.find(attrs={"name": "execution"})['value'],
-            "_eventId": soup.find(attrs={"name": "_eventId"})['value']
-        }
-
-        # authentication
-        s.post(LOGIN_URL, data=login_data)
-        if not BeautifulSoup(s.get(BASE_URL).text, "html.parser").find("input", {"class": "input_submit"}):
-            return s
-        else:
-            raise AuthError("Invalid username and/or password !")
