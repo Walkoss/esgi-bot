@@ -1,6 +1,6 @@
 class AuthError(RuntimeError):
-    print("Invalid username and/or password !")
+    pass
 
 
-class ValueNotFound(RuntimeError):
-    print("Invalid entry or value not found !")
+class ValueNotFoundError(RuntimeError):
+    pass

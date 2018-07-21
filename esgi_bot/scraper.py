@@ -1,5 +1,5 @@
 import requests
-from esgi_bot.errors import AuthError, ValueNotFound
+from esgi_bot.errors import AuthError, ValueNotFoundError
 from esgi_bot.subject import Subject
 from bs4 import BeautifulSoup
 
@@ -40,7 +40,7 @@ class Scraper(object):
         if subject_name == "ALL":
             return marks_array
         else:
-            raise ValueNotFound()
+            raise ValueNotFoundError("Invalid entry or value not found !")
 
     # TODO IDs could not be statics so take care ;)
     def get_last_annual_documents(self):
@@ -78,7 +78,7 @@ class Scraper(object):
         elif not _name:
             return links
         else:
-            raise ValueNotFound()
+            raise ValueNotFoundError("Invalid entry or value not found !")
 
     def _new_session(self, login, password):
         s = requests.session()
@@ -98,4 +98,4 @@ class Scraper(object):
         if not BeautifulSoup(s.get(BASE_URL).text, "html.parser").find("input", {"class": "input_submit"}):
             return s
         else:
-            raise AuthError()
+            raise AuthError("Invalid username and/or password !")
