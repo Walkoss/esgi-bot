@@ -5,7 +5,7 @@ from discord.ext import commands
 COMMANDS = [
     'absence',
     'mark',
-    'teacher',
+    'planning',
     'login'
 ]
 
