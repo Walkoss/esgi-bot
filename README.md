@@ -20,7 +20,7 @@ Docker if you want to use it.
 
 Create a `.env` file which will contains all environment variables that a required by this application and edit it to set variables.
 
-```
+```sh
 cp .env.example
 <YOUR_EDITOR> .env
 ```
@@ -29,12 +29,12 @@ Note: this project use dialogflow so you have to set path to google credentials 
 
 Note also that `/opt/project` will be the base directory of this project under Docker. So put your file under this base directory and change `GOOGLE_APPLICATION_CREDENTIALS` value to `/opt/projects/google_client_secret.json`
 
-```
+```sh
 # Build Docker image
 docker build -t esgi_bot:v1 .
 ```
 
-```
+```sh
 # Run application
 docker run --env-file .env esgi_bot:v1
 ```
@@ -45,17 +45,17 @@ Export all environment variables under `.env.example` into your local environmen
 
 `GOOGLE_APPLICATION_CREDENTIALS` must be the path to your google credentials file (JSON). e.g. `/opt/project/google_client_secret.json`
 
-```
+```sh
 # Install requirements
 pip install -r requirements.txt
 ```
 
-```
+```sh
 # Install project
 python setup.py install
 ```
 
-```
+```sh
 # Run application
 python esgi_bot/run.py
 ```
