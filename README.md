@@ -70,4 +70,4 @@ python esgi_bot/run.py
 
 * **Walid El Bouchikhi**  - [Walkoss](https://github.com/Walkoss)
 * **Pierre Simon** - [rypall](https://github.com/rypall)
-* **Walid El Bouchikhi** - [Alexis-Petrillo](https://github.com/Alexis-Petrillo)
+* **Alexis Petrillo** - [Alexis-Petrillo](https://github.com/Alexis-Petrillo)
