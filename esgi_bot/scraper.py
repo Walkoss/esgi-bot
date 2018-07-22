@@ -46,7 +46,7 @@ class Scraper(object):
                 marks["CC" + str(i + 1)] = cc if cc else 'N/A'
             marks["exam"] = row[-1] if row[-1] else 'N/A'
             subject["marks"] = marks
-            if name and name in subject["name"].lower():
+            if name and name.lower() in subject["name"].lower():
                 subjects.append(subject)
                 break
             elif not name:
