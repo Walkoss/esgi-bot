@@ -7,7 +7,8 @@ COMMANDS = [
     'mark',
     'planning',
     'login',
-    'projects'
+    'project',
+    'deadline'
 ]
 
 
