@@ -8,7 +8,9 @@ COMMANDS = [
     'planning',
     'login',
     'project',
-    'deadline'
+    'deadline',
+    'course_support',
+    'document'
 ]
 
 
