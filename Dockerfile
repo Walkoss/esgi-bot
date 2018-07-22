@@ -12,4 +12,4 @@ COPY . .
 RUN python setup.py install
 
 # Run bot
-ENTRYPOINT run_bot
+CMD python esgi_bot/run.py

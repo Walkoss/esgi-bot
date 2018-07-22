@@ -21,12 +21,14 @@ def run():
 
     for extension in ['commands.' + command for command in COMMANDS]:
         try:
+            logger.info('Loading extension: {}'.format(extension))
             bot.load_extension(extension)
         except Exception as e:
             logger.error('{}: {}'.format(type(e).__name__, e))
 
     @bot.event
     async def on_command_error(error, ctx):
+        logger.error(error)
         if isinstance(error, commands.errors.CheckFailure):
             await bot.send_message(ctx.message.author, "You're not authenticated")
 
@@ -37,6 +39,7 @@ def run():
         elif bot.user.id in message.raw_mentions:
             # Bot got mentionned
             text = message.clean_content.split(' ', 1)[1]
+            logger.info('Bot got mentionned with message: {}'.format(text))
             session_client = dialogflow.SessionsClient()
             session = session_client.session_path(DIALOGFLOW_PROJECT_ID, message.author.id)
             text_input = dialogflow.types.TextInput(text=text, language_code='fr-FR')
@@ -44,10 +47,13 @@ def run():
             response = session_client.detect_intent(session=session, query_input=query_input)
             await bot.send_message(message.channel, response.query_result.fulfillment_text)
             if response.query_result.all_required_params_present and response.query_result.action:
+                logger.info('Receive action {} from dialogflow'.format(response.query_result.action))
                 action = response.query_result.action.split('.')
                 try:
                     if action[0] in COMMANDS:
+                        logger.info('Importing module {}'.format(action[0]))
                         module = importlib.import_module('handlers.{}'.format(action[0]))
+                        logger.info('Getting function {} from module'.format(action[1], action[0]))
                         func = getattr(module, action[1])
                         parameters = dict()
                         for param in response.query_result.parameters:

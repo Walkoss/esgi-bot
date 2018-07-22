@@ -16,8 +16,5 @@ setup(
     author='Walid EL BOUCHIKHI, Pierre SIMON, Alexis PETRILLO',
     author_email='walid.elbouchikhi@gmail.com',
     url='https://github.com/Walkoss/esgi-bot',
-    packages=find_packages(),
-    entry_points={
-        'console_scripts': ['run_bot=esgi_bot.run:run']
-    },
+    packages=find_packages()
 )
