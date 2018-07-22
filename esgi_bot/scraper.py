@@ -23,7 +23,7 @@ class Scraper(object):
 
         # authentication
         s.post(LOGIN_URL, data=login_data)
-        if not BeautifulSoup(s.get(BASE_URL).text, "html.parser").find("input", {"class": "input_submit"}):
+        if not BeautifulSoup(s.get(BASE_URL + 'student/marks').text, "html.parser").find("input", {"class": "input_submit"}):
             self.session = s
         else:
             raise AuthError("Invalid username and/or password !")
@@ -31,49 +31,53 @@ class Scraper(object):
     # Parsing https://www.myges.fr/student/marks
     def get_marks(self, name=""):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/marks").text, "html.parser")
-        subject_dict = []
+        subjects = []
         rows = soup.find(id="marksWidget").find_all('tr')
-        data = self._parse_html_array_rows(rows)
+        data = self.parse_html_array_rows(rows)
         for row in data:
-            subject = {"name": row[0],
-                       "teacher": row[1],
-                       "coeff": row[2],
-                       "ects": row[3]}
+            subject = {
+                "name": row[0],
+                "teacher": row[1],
+                "coeff": row[2],
+                "ects": row[3]
+            }
             marks = {}
             for i, cc in enumerate(row[4:-1]):
-                marks["cc" + str(i + 1)] = cc
-            marks["exam"] = row[-1]
+                marks["CC" + str(i + 1)] = cc if cc else 'N/A'
+            marks["exam"] = row[-1] if row[-1] else 'N/A'
             subject["marks"] = marks
-            if name == subject["name"]:
-                subject_dict.append(subject)
-                return subject_dict
+            if name and name in subject["name"].lower():
+                subjects.append(subject)
+                break
             elif not name:
-                subject_dict.append(subject)
-        if not name:
-            return subject_dict
+                subjects.append(subject)
+        if subjects:
+            return subjects
         raise ValueNotFoundError("Invalid entry or value not found !")
 
     def get_absences(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/marks").text, "html.parser")
         rows = soup.find("tbody", {"id": "marksForm:missingsWidget:missingsTable_data"})
-        data = self._parse_html_array_rows(rows)
-        absences_array = []
+        data = self.parse_html_array_rows(rows)
+        absences = []
         for row in data:
-            absence = {"date": row[0],
-                       "subject": row[1],
-                       "type": row[2],
-                       "justified": row[3]}
-            absences_array.append(absence)
-        return absences_array
+            absence = {
+                "date": row[0],
+                "subject": row[1],
+                "type": row[2],
+                "justified": row[3]
+            }
+            absences.append(absence)
+        return absences
 
     # Parsing https://www.myges.fr/student/home
     def get_last_annual_documents(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
-        return self._get_array_links(soup, "j_idt211:j_idt212")
+        return self.get_array_links(soup, "j_idt211:j_idt212")
 
     def get_last_course_supports(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
-        return self._get_array_links(soup, "j_idt243:j_idt244")
+        return self.get_array_links(soup, "j_idt243:j_idt244")
 
     def get_last_deadlines(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
@@ -90,7 +94,7 @@ class Scraper(object):
     def get_projects(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/project-list").text, "html.parser")
         rows = soup.find("tbody", {"id": "projectListForm:listProjectWidget:projectDatatable_data"})
-        data = self._parse_html_array_rows(rows)
+        data = self.parse_html_array_rows(rows)
         projects_array = []
         for row in data:
             project = {"subject": row[3],
@@ -115,7 +119,8 @@ class Scraper(object):
         raise ValueNotFoundError("File not found !")
 
     # private methods
-    def _parse_html_array_rows(self, html_array_rows):
+    @staticmethod
+    def parse_html_array_rows(html_array_rows):
         data = []
         for row in html_array_rows:
             cols = row.find_all('td')
@@ -124,7 +129,8 @@ class Scraper(object):
                 data.append([ele for ele in cols])
         return data
 
-    def _get_array_links(self, page, _id):
+    @staticmethod
+    def get_array_links(page, _id):
         links = dict()
         table = page.find("div", {"id": _id})
         for row in table.find("tbody").find_all('tr'):
