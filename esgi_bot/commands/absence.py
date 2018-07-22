@@ -13,10 +13,10 @@ class Absence:
         scraper = get_user(ctx.message.author.id)
         if scraper:
             absences = scraper.get_absences()
+            embed = discord.Embed(colour=0x217bb1)
+            embed.set_footer(text="Scrapped from MyGES",
+                             icon_url="https://www.myges.fr/assets/img/icons/favicon.png")
             if absences:
-                embed = discord.Embed(colour=0x217bb1)
-                embed.set_footer(text="Scrapped from MyGES",
-                                 icon_url="https://www.myges.fr/assets/img/icons/favicon.png")
                 for absence in absences:
                     embed.add_field(name="Date", value=absence["date"], inline=True)
                     embed.add_field(name="Type", value=absence["type"], inline=True)
@@ -25,7 +25,9 @@ class Absence:
                     await self.bot.say(embed=embed)
                     embed.clear_fields()
             else:
-                await self.bot.say("You don't have absence :)")
+                embed.title = "GG You have no absence yet !"
+                embed.set_image(url="https://media.giphy.com/media/l0MYJnJQ4EiYLxvQ4/giphy.gif")
+                await self.bot.say(embed=embed)
 
 
 def setup(bot):
