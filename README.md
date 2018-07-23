@@ -69,5 +69,5 @@ python esgi_bot/run.py
 ## Authors
 
 * **Walid El Bouchikhi**  - [Walkoss](https://github.com/Walkoss)
-* **Pierre Simon** - [rypall](https://github.com/rypall)
+* **Pierre Simon** - [Rypall](https://github.com/rypall)
 * **Alexis Petrillo** - [Alexis-Petrillo](https://github.com/Alexis-Petrillo)
