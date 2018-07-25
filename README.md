@@ -18,7 +18,7 @@ Docker if you want to use it.
 
 ### Installing and running with Docker
 
-Create a `.env` file which will contains all environment variables that a required by this application and edit it to set variables.
+Create a `.env` file which will contains all environment variables that are required by this application and edit it to set variables.
 
 ```sh
 cp .env.example
