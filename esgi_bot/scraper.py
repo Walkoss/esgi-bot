@@ -87,7 +87,7 @@ class Scraper(object):
         steps = []
         for row in table.find("tbody").find_all('tr'):
             if row.find('td', text=re.compile("Aucune entrée")):
-                return []
+                break
             name = row.find("span", {"style": "font-size:11px;"}).contents[0]
             date = row.find("span", {"style": "font-size:11px;font-weight: bold;color: #000000"}).contents[0]
             steps.append({"name": name,
