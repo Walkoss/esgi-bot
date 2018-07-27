@@ -61,7 +61,7 @@ class Scraper(object):
         data = self.parse_html_array_rows(rows)
         absences = []
         for row in data:
-            if len(row) == 1:
+            if row[0] == "Aucune entrée":
                 break
             absence = {
                 "date": row[0],
