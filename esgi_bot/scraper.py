@@ -75,17 +75,19 @@ class Scraper(object):
     # Parsing https://www.myges.fr/student/home
     def get_last_annual_documents(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
-        return self.get_array_links(soup, "j_idt211:j_idt212")
+        return self.get_array_links(soup, "Mes derniers documents annuels")
 
     def get_last_course_supports(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
-        return self.get_array_links(soup, "j_idt243:j_idt244")
+        return self.get_array_links(soup, "Mes derniers supports de cours")
 
     def get_last_deadlines(self):
         soup = BeautifulSoup(self.session.get(BASE_URL + "student/home").text, "html.parser")
+        table = soup.find('span', text=re.compile("Mes prochaines étapes projet")).parent.parent
         steps = []
-        table = soup.find("div", {"id": "j_idt257:j_idt258"})
         for row in table.find("tbody").find_all('tr'):
+            if row.find('td', text=re.compile("Aucune entrée")):
+                return []
             name = row.find("span", {"style": "font-size:11px;"}).contents[0]
             date = row.find("span", {"style": "font-size:11px;font-weight: bold;color: #000000"}).contents[0]
             steps.append({"name": name,
@@ -134,7 +136,7 @@ class Scraper(object):
     @staticmethod
     def get_array_links(page, _id):
         links = dict()
-        table = page.find("div", {"id": _id})
+        table = page.find('span', text=re.compile(_id)).parent.parent
         for row in table.find("tbody").find_all('tr'):
             name = row.find("a").contents[0].replace("\n", "").strip()
             js = row.find("a").get('onclick')
