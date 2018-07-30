@@ -9,9 +9,13 @@ async def deadlines(message, bot):
         embed.set_footer(text="Scrapped from MyGES",
                          icon_url="https://www.myges.fr/assets/img/icons/favicon.png")
         deadlines = scraper.get_last_deadlines()
-
-        for deadline in deadlines:
-            embed.add_field(name="Name", value=deadline["name"], inline=True)
-            embed.add_field(name="Date", value=deadline["date"], inline=True)
-        await bot.send_message(message.channel, embed=embed)
-        embed.clear_fields()
+        if deadlines:
+            for deadline in deadlines:
+                embed.add_field(name="Name", value=deadline["name"], inline=True)
+                embed.add_field(name="Date", value=deadline["date"], inline=True)
+            await bot.send_message(message.channel, embed=embed)
+            embed.clear_fields()
+        else:
+            embed.title = "Have Fun no more deadlines !"
+            embed.set_image(url="https://media.giphy.com/media/EPREHnXlPo7jW/giphy.gif")
+            await bot.send_message(message.channel, embed=embed)
