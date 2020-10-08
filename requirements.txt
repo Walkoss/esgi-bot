@@ -1,4 +1,4 @@
 beautifulsoup4==4.6.0
-requests==2.19.1
+requests==2.20.0
 discord.py==0.16.12
 dialogflow==0.5.1
